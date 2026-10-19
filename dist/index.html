@@ -1,0 +1,754 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8">
+    <link rel="stylesheet" href="./style.css">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pen</title>
+  </head>
+  <body>
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Ritmik Sayma Kapsamlı Özel Eğitim Portalı</title>
+  
+  <link rel="manifest" href="manifest.json">
+  <meta name="theme-color" content="#4338ca">
+  <link rel="apple-touch-icon" href="icon-192.png">
+  
+  <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+  <style>
+    * { box-sizing: border-box; user-select: none; -webkit-user-select: none; }
+    
+    body {
+      margin: 0; padding: 16px;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Comic Sans MS", sans-serif;
+      background: radial-gradient(circle at 10% 20%, #e0e7ff 0%, #ede9fe 40%, #f1f5f9 90%);
+      background-attachment: fixed; color: #1e293b; display: flex; flex-direction: column; align-items: center; min-height: 100vh;
+      transition: background 0.3s, color 0.3s; position: relative; overflow-x: hidden;
+    }
+
+    body.contrast-mode { background: #000000 !important; color: #ffffff !important; }
+    body.contrast-mode .top-control, body.contrast-mode .student-main-bar, body.contrast-mode .teacher-panel,
+    body.contrast-mode .win-modal, body.contrast-mode .attempts-log-section, body.contrast-mode .notes-section,
+    body.contrast-mode .backup-section, body.contrast-mode .welcome-card, body.contrast-mode .hw-widget {
+      background: #111111 !important; border: 3px solid #facc15 !important; color: #ffffff !important; box-shadow: none !important;
+    }
+    body.contrast-mode .panel-title-text, body.contrast-mode .student-group label,
+    body.contrast-mode h1, body.contrast-mode h2, body.contrast-mode h3 { color: #facc15 !important; }
+    body.contrast-mode .styled-select, body.contrast-mode .styled-input, body.contrast-mode .note-input {
+      background: #222222 !important; color: #ffffff !important; border: 2px solid #facc15 !important;
+    }
+    body.contrast-mode .step-pill { background: #222222 !important; color: #ffffff !important; border: 3px solid #ffffff !important; }
+    body.contrast-mode .step-pill.active { background: #facc15 !important; color: #000000 !important; border: 3px solid #eab308 !important; font-weight: 900 !important; }
+    body.contrast-mode .dir-btn, body.contrast-mode .opt-count-btn, body.contrast-mode .mode-pill, body.contrast-mode .btn-toggle-tool {
+      background: #222222 !important; color: #ffffff !important; border: 2px solid #ffffff !important;
+    }
+    body.contrast-mode .dir-btn.active, body.contrast-mode .opt-count-btn.active, body.contrast-mode .mode-pill.active, body.contrast-mode .btn-toggle-tool.active {
+      background: #facc15 !important; color: #000000 !important; border-color: #eab308 !important; font-weight: 900 !important;
+    }
+    body.contrast-mode .timer-pill, body.contrast-mode .btn-recall-standalone, body.contrast-mode .btn-restart-standalone {
+      background: #222222 !important; color: #facc15 !important; border: 2px solid #facc15 !important;
+    }
+    body.contrast-mode .btn-choice { background: #222222 !important; color: #facc15 !important; border: 3px solid #facc15 !important; box-shadow: none !important; }
+
+    .welcome-screen { width: 100%; max-width: 850px; min-height: 85vh; display: flex; flex-direction: column; align-items: center; justify-content: center; position: relative; z-index: 10; }
+    .math-bg-symbols { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; pointer-events: none; z-index: 1; overflow: hidden; opacity: 0.18; }
+    .math-symbol { position: absolute; font-weight: 900; font-family: "Comic Sans MS", cursive, sans-serif; animation: floatMath 12s infinite alternate ease-in-out; }
+    @keyframes floatMath { 0% { transform: translateY(0) rotate(0deg); } 100% { transform: translateY(-40px) rotate(15deg); } }
+
+    .welcome-card { width: 100%; background: rgba(255, 255, 255, 0.94); backdrop-filter: blur(12px); border: 3px solid rgba(255, 255, 255, 0.9); border-radius: 36px; padding: 40px 32px; box-shadow: 0 20px 45px rgba(99, 102, 241, 0.18); text-align: center; display: flex; flex-direction: column; align-items: center; gap: 20px; position: relative; }
+    .btn-fs-corner { position: absolute; top: 22px; right: 24px; padding: 8px 14px; font-size: 0.95rem; font-weight: 800; border: 2px solid #cbd5e1; border-radius: 14px; background: #fff; cursor: pointer; color: #475569; display: flex; align-items: center; gap: 6px; }
+    .welcome-badge { display: inline-flex; align-items: center; gap: 8px; background: #f1f5f9; border: 2px solid #cbd5e1; border-radius: 20px; padding: 6px 18px; font-size: 1.05rem; font-weight: 800; color: #475569; }
+    .app-main-title { font-size: 2.8rem; font-weight: 900; margin: 0; background: linear-gradient(135deg, #4338ca, #7c3aed, #db2777); -webkit-background-clip: text; -webkit-text-fill-color: transparent; letter-spacing: -0.5px; }
+    .author-tag { font-size: 1.25rem; font-weight: 800; color: #0284c7; background: #e0f2fe; border: 2px solid #bae6fd; padding: 8px 24px; border-radius: 22px; display: inline-block; }
+    .start-student-box { width: 100%; max-width: 580px; background: #f8fafc; border: 2px solid #e2e8f0; border-radius: 26px; padding: 24px; display: flex; flex-direction: column; gap: 16px; text-align: left; }
+    .start-row { display: flex; flex-direction: column; gap: 8px; }
+    .start-row label { font-size: 1.1rem; font-weight: 800; color: #334155; }
+    .btn-start-game { width: 100%; height: 75px; font-size: 1.6rem; font-weight: 900; background: linear-gradient(135deg, #16a34a, #15803d); color: #fff; border: none; border-radius: 22px; cursor: pointer; box-shadow: 0 6px 0 #14532d, 0 10px 20px rgba(22, 163, 74, 0.3); transition: transform 0.1s; margin-top: 10px; }
+    .btn-start-game:active { transform: translateY(4px); box-shadow: none; }
+
+    .app-shell { width: 100%; max-width: 1050px; display: none; flex-direction: column; align-items: center; position: relative; z-index: 10; }
+    .student-main-bar { width: 100%; background: rgba(255, 255, 255, 0.92); backdrop-filter: blur(8px); border: 2px solid rgba(255, 255, 255, 0.8); border-radius: 24px; padding: 12px 18px; margin-bottom: 14px; display: flex; flex-wrap: wrap; gap: 10px; align-items: center; justify-content: space-between; box-shadow: 0 10px 25px -5px rgba(99, 102, 241, 0.08); }
+    .student-group { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+    .student-group label { font-size: 1.1rem; font-weight: 800; color: inherit; }
+    .styled-select, .styled-input { padding: 9px 14px; font-size: 1.05rem; border: 2px solid #cbd5e1; border-radius: 14px; background: #fff; font-weight: 700; color: inherit; user-select: text; -webkit-user-select: text; }
+    .btn-action-sm { padding: 9px 18px; font-size: 1rem; font-weight: 800; border: none; border-radius: 14px; cursor: pointer; transition: transform 0.1s; }
+    .btn-action-sm:active { transform: scale(0.96); }
+    .btn-add { background: #16a34a; color: #fff; box-shadow: 0 4px 10px rgba(22, 163, 74, 0.25); }
+    .btn-del { background: #dc2626; color: #fff; box-shadow: 0 4px 10px rgba(220, 38, 38, 0.25); }
+    .btn-home { background: #4f46e5; color: #fff; }
+    .accessibility-toggles { display: flex; gap: 6px; align-items: center; }
+    .btn-toggle-tool { padding: 8px 14px; font-size: 0.95rem; font-weight: 700; border: 2px solid #cbd5e1; border-radius: 14px; background: #fff; cursor: pointer; color: inherit; }
+    .btn-toggle-tool.active { background: #3b82f6; color: #fff; border-color: #2563eb; }
+
+    /* Ödev Widget (Öğrenci Ekranı) */
+    .hw-widget { width: 100%; background: #fffbeb; border: 3px solid #fde68a; border-radius: 20px; padding: 16px; margin-bottom: 14px; display: none; box-shadow: 0 10px 20px rgba(217, 119, 6, 0.1); }
+    .hw-title { font-size: 1.3rem; font-weight: 900; color: #92400e; margin: 0 0 12px 0; display: flex; align-items: center; gap: 8px; }
+    .hw-task-list { display: flex; flex-direction: column; gap: 8px; margin-bottom: 12px; }
+    .hw-task-item { display: flex; justify-content: space-between; align-items: center; background: #fff; border: 2px solid #fcd34d; padding: 10px 14px; border-radius: 12px; font-size: 1.1rem; font-weight: 800; color: #78350f; }
+    .hw-task-item.done { background: #dcfce7; border-color: #86efac; color: #166534; text-decoration: line-through; opacity: 0.8; }
+    .hw-task-status { background: #fef3c7; padding: 4px 10px; border-radius: 10px; font-size: 1rem; }
+    .hw-task-item.done .hw-task-status { background: #22c55e; color: #fff; }
+    .parent-note-box { display: flex; flex-direction: column; gap: 6px; border-top: 2px dashed #fcd34d; padding-top: 12px; }
+    .parent-note-box label { font-size: 1rem; font-weight: 800; color: #92400e; }
+    
+    .top-control { width: 100%; background: rgba(255, 255, 255, 0.94); backdrop-filter: blur(8px); padding: 16px 22px; border-radius: 28px; margin-bottom: 14px; border: 2px solid rgba(255, 255, 255, 0.8); box-shadow: 0 12px 28px -6px rgba(99, 102, 241, 0.1); }
+    .panel-title-text { font-size: 1.35rem; font-weight: 800; text-align: center; margin-bottom: 12px; color: #1e293b; }
+    .step-list { display: flex; gap: 8px; justify-content: center; flex-wrap: wrap; margin-bottom: 14px; }
+    .step-pill { min-width: 62px; height: 62px; font-size: 1.65rem; font-weight: 800; border: 3px solid #e2e8f0; background: #ffffff; border-radius: 18px; cursor: pointer; color: inherit; transition: transform 0.15s, box-shadow 0.15s; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05); }
+    .step-pill.active { background: linear-gradient(135deg, #3b82f6, #1d4ed8); color: #ffffff; border-color: #1d4ed8; transform: scale(1.08); box-shadow: 0 8px 16px -2px rgba(37, 99, 235, 0.35); }
+    .sub-control-row { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; }
+    .dir-group { display: flex; gap: 6px; align-items: center; flex-wrap: wrap; }
+    .dir-btn, .opt-count-btn { padding: 9px 16px; font-size: 1rem; font-weight: 700; border: 2px solid #cbd5e1; border-radius: 18px; background: #fff; cursor: pointer; color: inherit; }
+    .dir-btn.active, .opt-count-btn.active { background: #059669; color: #fff; border-color: #047857; box-shadow: 0 4px 10px rgba(5, 150, 105, 0.25); }
+    .timer-pill { font-size: 1.25rem; font-weight: 800; color: #0369a1; background: #e0f2fe; padding: 8px 20px; border-radius: 20px; border: 2px solid #bae6fd; }
+
+    .nav-and-tools { width: 100%; display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px; flex-wrap: wrap; gap: 10px; }
+    .mode-nav { display: flex; gap: 8px; flex-wrap: wrap; }
+    .mode-pill { padding: 11px 18px; font-size: 1.15rem; font-weight: 800; border: none; border-radius: 20px; background: rgba(255, 255, 255, 0.85); color: #334155; cursor: pointer; box-shadow: 0 2px 5px rgba(0,0,0,0.04); transition: transform 0.1s; }
+    .mode-pill.active { background: linear-gradient(135deg, #8b5cf6, #6d28d9); color: #ffffff; box-shadow: 0 6px 14px rgba(109, 40, 217, 0.3); }
+    
+    /* ÖĞRETMEN BASILI TUTMA EFEKTİ SİLLERİ */
+    .mode-pill.teacher { 
+      background: #f59e0b; color: #ffffff; position: relative; overflow: hidden; 
+    }
+    .mode-pill.teacher .fill-bg {
+      position: absolute; left: 0; top: 0; bottom: 0; width: 0%;
+      background: rgba(0,0,0,0.25); transition: width 0s; z-index: 0;
+    }
+    .mode-pill.teacher.filling .fill-bg {
+      width: 100%; transition: width 3s linear;
+    }
+    .mode-pill.teacher span { position: relative; z-index: 1; pointer-events: none; }
+    .mode-pill.teacher.active { background: #d97706; }
+
+    .action-tools-group { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+    .btn-recall-standalone, .btn-restart-standalone { padding: 11px 18px; font-size: 1.05rem; font-weight: 800; border-radius: 20px; cursor: pointer; display: flex; align-items: center; gap: 6px; transition: transform 0.1s; }
+    .btn-recall-standalone { background: #eff6ff; color: #1d4ed8; border: 2px solid #93c5fd; box-shadow: 0 4px 0 #60a5fa; }
+    .btn-restart-standalone { background: #fef2f2; color: #b91c1c; border: 2px solid #fca5a5; box-shadow: 0 4px 0 #f87171; }
+    .btn-recall-standalone:active, .btn-restart-standalone:active { transform: translateY(3px); box-shadow: none; }
+
+    .stage { width: 100%; display: flex; flex-direction: column; align-items: center; min-height: 450px; }
+    .hop-wrap { display: flex; flex-direction: column; align-items: center; width: 100%; }
+    .lily-pond { display: flex; flex-wrap: wrap; gap: 10px; justify-content: center; background: linear-gradient(135deg, #38bdf8, #0284c7); padding: 24px 18px; border-radius: 30px; width: 100%; margin-bottom: 18px; border: 4px solid #bae6fd; box-shadow: 0 12px 24px rgba(2, 132, 199, 0.25); }
+    .pad { min-width: 74px; height: 74px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 1.75rem; font-weight: 800; background: #86efac; color: #14532d; border: 4px solid #22c55e; position: relative; box-shadow: 0 4px 8px rgba(0,0,0,0.12); }
+    .pad.missing { background: #fef08a; border-color: #ca8a04; color: #854d0e; }
+    .pad.empty { background: #e2e8f0; border-color: #cbd5e1; color: #94a3b8; }
+    .frog-char { position: absolute; top: -18px; font-size: 2rem; }
+
+    .missing-mode-wrap { display: none; flex-direction: column; align-items: center; width: 100%; }
+    .missing-mode-track { display: flex; flex-wrap: wrap; gap: 12px; justify-content: center; background: linear-gradient(135deg, #fef3c7, #fed7aa); padding: 24px 18px; border-radius: 32px; width: 100%; margin-bottom: 20px; border: 4px solid #fde68a; box-shadow: 0 12px 28px rgba(245, 158, 11, 0.2); }
+    .toy-block { min-width: 76px; height: 76px; border-radius: 22px; display: flex; flex-direction: column; align-items: center; justify-content: center; font-size: 1.85rem; font-weight: 900; background: linear-gradient(180deg, #ffffff 0%, #f1f5f9 100%); color: #3b82f6; border: 3px solid #93c5fd; box-shadow: 0 6px 0 #60a5fa, 0 10px 15px rgba(0,0,0,0.08); position: relative; transition: all 0.25s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
+    .toy-block.mystery-chest { background: linear-gradient(135deg, #fbbf24, #d97706); color: #ffffff; border: 3px solid #fef08a; box-shadow: 0 6px 0 #b45309, 0 12px 20px rgba(217, 119, 6, 0.35); animation: chestWiggle 1.4s infinite ease-in-out; }
+    @keyframes chestWiggle { 0%, 100% { transform: scale(1) rotate(0deg); } 25% { transform: scale(1.06) rotate(-3deg); } 75% { transform: scale(1.06) rotate(3deg); } }
+    .toy-block .chest-icon { font-size: 1.1rem; margin-bottom: -2px; }
+
+    .train-wrap { display: none; flex-direction: column; align-items: center; width: 100%; }
+    .train-track { width: 100%; overflow-x: auto; background: linear-gradient(135deg, #fef08a, #fde047); border: 4px solid #fef9c3; border-radius: 30px; padding: 24px 16px; margin-bottom: 18px; display: flex; align-items: center; gap: 8px; box-shadow: 0 12px 24px rgba(234, 179, 8, 0.2); }
+    .train-loco { font-size: 3.5rem; margin-right: 6px; }
+    .wagon { min-width: 74px; height: 74px; background: #3b82f6; color: #ffffff; border: 3px solid #1d4ed8; border-radius: 18px; display: flex; align-items: center; justify-content: center; font-size: 1.75rem; font-weight: 800; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
+    .wagon.missing { background: #fef08a; border-color: #ca8a04; color: #854d0e; }
+    .wagon.empty { background: #e2e8f0; border-color: #cbd5e1; color: #94a3b8; }
+
+    .basket-wrap { display: none; flex-direction: column; align-items: center; width: 100%; }
+    .orchard { display: flex; flex-wrap: wrap; gap: 12px; justify-content: center; background: linear-gradient(135deg, #bbf7d0, #86efac); padding: 22px; border-radius: 30px; border: 4px solid #dcfce7; width: 100%; margin-bottom: 18px; box-shadow: 0 12px 24px rgba(34, 197, 94, 0.2); }
+    .basket { min-width: 145px; min-height: 135px; background: #fed7aa; border: 4px solid #ea580c; border-radius: 20px 20px 30px 30px; display: flex; flex-direction: column; align-items: center; justify-content: space-between; padding: 8px; box-shadow: 0 6px 12px rgba(0,0,0,0.08); }
+    .interactive-fruit-grid { display: flex; flex-wrap: wrap; justify-content: center; gap: 4px; max-width: 140px; padding: 4px; }
+    .touch-fruit { font-size: 1.5rem; cursor: pointer; transition: transform 0.1s; padding: 2px; border-radius: 8px; }
+    .touch-fruit:active { transform: scale(1.3); }
+    .touch-fruit.counted { background: #bbf7d0; box-shadow: 0 0 4px #22c55e; }
+    .basket .basket-total { font-weight: 800; font-size: 1.5rem; color: #9a3412; background: #ffedd5; width: 100%; text-align: center; border-radius: 12px; padding: 2px 0; }
+
+    .balloon-sky { width: 100%; height: 380px; background: linear-gradient(180deg, #bae6fd, #e0f2fe); border-radius: 30px; position: relative; overflow: hidden; border: 4px solid #7dd3fc; display: none; box-shadow: 0 12px 24px rgba(56, 189, 248, 0.2); }
+    .sky-header { position: absolute; top: 12px; left: 16px; font-size: 1.5rem; font-weight: 800; color: #0369a1; }
+    .balloon { position: absolute; width: 88px; height: 102px; border-radius: 50% 50% 50% 50% / 40% 40% 60% 60%; display: flex; align-items: center; justify-content: center; font-size: 1.9rem; font-weight: 800; color: #fff; cursor: pointer; box-shadow: inset -5px -5px 10px rgba(0,0,0,0.18), 0 8px 12px rgba(0,0,0,0.1); transition: transform 0.15s, opacity 0.2s; }
+
+    .spy-wrap { display: none; flex-direction: column; align-items: center; width: 100%; }
+    .spy-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px; width: 100%; max-width: 480px; }
+    .btn-spy { height: 85px; font-size: 2.3rem; font-weight: 800; background: #fef08a; color: #713f12; border: 4px solid #eab308; border-radius: 22px; cursor: pointer; box-shadow: 0 4px 8px rgba(0,0,0,0.06); }
+
+    .choices-container { display: flex; flex-direction: column; align-items: center; width: 100%; gap: 12px; }
+    .btn-grid-row { display: grid; gap: 14px; width: 100%; max-width: 540px; }
+    .btn-grid-row.two-opts { grid-template-columns: repeat(2, 1fr); max-width: 380px; }
+    .btn-grid-row.three-opts { grid-template-columns: repeat(3, 1fr); max-width: 520px; }
+    .btn-grid-row.four-opts { grid-template-columns: repeat(4, 1fr); max-width: 620px; }
+    .btn-choice { height: 82px; font-size: 2.2rem; font-weight: 800; background: #7c3aed; color: #fff; border: none; border-radius: 22px; box-shadow: 0 6px 0 #5b21b6; cursor: pointer; transition: transform 0.1s, border 0.2s; }
+    .btn-choice:active { transform: translateY(4px); box-shadow: none; }
+    .btn-choice.glow-hint { animation: pulseHint 0.8s infinite alternate; border: 6px solid #facc15 !important; background: #ca8a04 !important; }
+    @keyframes pulseHint { 0% { transform: scale(1); } 100% { transform: scale(1.08); } }
+    .btn-choice.shake { animation: shake 0.3s; background: #ef4444; box-shadow: 0 6px 0 #b91c1c; }
+    @keyframes shake { 0%,100% { transform: translateX(0); } 25% { transform: translateX(-6px); } 75% { transform: translateX(6px); } }
+
+    .feedback-toast { min-height: 40px; font-size: 1.35rem; font-weight: 800; color: #9a3412; background: #ffedd5; border: 2px solid #fed7aa; padding: 8px 22px; border-radius: 18px; margin-top: 10px; text-align: center; display: none; box-shadow: 0 4px 10px rgba(234, 88, 12, 0.15); }
+
+    .win-modal { display: none; text-align: center; background: rgba(255, 255, 255, 0.98); padding: 42px 32px; border-radius: 36px; box-shadow: 0 20px 40px rgba(0,0,0,0.15); width: 100%; max-width: 480px; border: 4px solid #facc15; }
+    .win-stars { font-size: 3.8rem; margin-bottom: 12px; }
+    .win-title { color: #15803d; font-size: 2.8rem; font-weight: 900; margin: 0 0 10px 0; }
+    .win-sub { color: #475569; font-size: 1.5rem; font-weight: 800; margin-bottom: 24px; }
+
+    .teacher-panel { display: none; width: 100%; background: rgba(255, 255, 255, 0.96); backdrop-filter: blur(8px); border-radius: 28px; padding: 26px; border: 2px solid rgba(255, 255, 255, 0.8); box-shadow: 0 12px 28px rgba(99, 102, 241, 0.1); }
+    
+    .teacher-tab-btn { background: #f1f5f9; color: #475569; font-size: 1.15rem; padding: 10px 20px; font-weight: 800; border: 2px solid #cbd5e1; border-radius: 16px; cursor: pointer; transition: all 0.2s; }
+    .teacher-tab-btn.active { background: #2563eb; color: #ffffff; border-color: #1d4ed8; box-shadow: 0 4px 10px rgba(37, 99, 235, 0.3); }
+
+    /* Ödev Modülü (Öğretmen) */
+    .hw-create-section { background: #fdf4ff; border: 2px solid #f0abfc; border-radius: 20px; padding: 18px; margin-bottom: 22px; }
+    .hw-create-title { font-size: 1.3rem; font-weight: 800; color: #a21caf; margin: 0 0 12px 0; }
+    .hw-inputs { display: flex; flex-wrap: wrap; gap: 10px; align-items: flex-end; margin-bottom: 14px; }
+    .hw-input-col { display: flex; flex-direction: column; gap: 4px; flex: 1; min-width: 140px; }
+    .hw-input-col label { font-size: 0.95rem; font-weight: 800; color: #701a75; }
+    .hw-added-list { display: flex; flex-direction: column; gap: 6px; margin-bottom: 12px; }
+    .hw-added-item { display: flex; justify-content: space-between; background: #fff; border: 1px solid #f0abfc; padding: 8px 12px; border-radius: 10px; font-weight: 700; color: #86198f; }
+
+    .stat-card-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 12px; margin-bottom: 20px; }
+    .stat-card { background: #f8fafc; border: 2px solid #e2e8f0; border-radius: 18px; padding: 14px; text-align: center; }
+    .stat-card .val { font-size: 2.1rem; font-weight: 800; color: #2563eb; }
+    .stat-card .lbl { font-size: 0.95rem; font-weight: 700; color: #64748b; margin-top: 4px; }
+    .data-table { width: 100%; border-collapse: collapse; margin-top: 10px; font-size: 1.1rem; }
+    .data-table th, .data-table td { border: 1px solid #cbd5e1; padding: 10px 12px; text-align: left; }
+    .data-table th { background: #f1f5f9; color: #334155; font-weight: 800; }
+    .attempts-log-section { margin-top: 22px; background: #f0fdf4; border: 2px solid #86efac; border-radius: 20px; padding: 18px; }
+    .attempt-card-list { display: flex; flex-direction: column; gap: 10px; }
+    .attempt-card { background: #ffffff; border: 1.5px solid #bbf7d0; border-radius: 16px; padding: 14px 16px; }
+    .attempt-tag { background: #22c55e; color: #fff; font-size: 0.9rem; font-weight: 800; padding: 3px 8px; border-radius: 8px; }
+    .system-comment-text { font-size: 1.05rem; color: #1e3a8a; background: #eff6ff; border-left: 4px solid #3b82f6; padding: 10px 12px; border-radius: 0 10px 10px 0; margin-top: 6px; line-height: 1.45; font-weight: 600; }
+    .notes-section { margin-top: 22px; background: #fffbeb; border: 2px solid #fde68a; border-radius: 20px; padding: 18px; }
+    .note-input { width: 100%; height: 85px; padding: 12px; font-size: 1.05rem; font-family: inherit; border: 2px solid #fcd34d; border-radius: 14px; resize: vertical; margin-bottom: 8px; user-select: text; -webkit-user-select: text; }
+    .note-item { background: #ffffff; border: 1px solid #fde68a; border-radius: 12px; padding: 12px 14px; font-size: 1.05rem; margin-top: 8px; }
+    .backup-section { margin-top: 22px; background: #f8fafc; border: 2px dashed #94a3b8; border-radius: 20px; padding: 18px; display: flex; flex-wrap: wrap; gap: 12px; align-items: center; justify-content: space-between; }
+    .backup-btn-group { display: flex; gap: 10px; flex-wrap: wrap; }
+    .btn-backup { padding: 10px 18px; font-size: 1rem; font-weight: 800; border: none; border-radius: 14px; cursor: pointer; color: #fff; display: flex; align-items: center; gap: 6px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
+    .btn-export { background: #0f766e; }
+    .btn-import { background: #4338ca; }
+    .btn-print-report { padding: 10px 20px; font-size: 1.05rem; font-weight: 800; background: #0284c7; color: #fff; border: none; border-radius: 14px; cursor: pointer; display: flex; align-items: center; gap: 8px; box-shadow: 0 4px 12px rgba(2, 132, 199, 0.25); }
+  </style>
+</head>
+<body>
+
+  <div class="math-bg-symbols">
+    <span class="math-symbol" style="top: 8%; left: 8%; font-size: 4rem; color: #3b82f6;">1 2 3</span>
+    <span class="math-symbol" style="top: 20%; right: 12%; font-size: 5rem; color: #8b5cf6;">+</span>
+    <span class="math-symbol" style="top: 45%; left: 5%; font-size: 4.5rem; color: #ec4899;">×</span>
+    <span class="math-symbol" style="top: 60%; right: 8%; font-size: 5rem; color: #10b981;">÷</span>
+    <span class="math-symbol" style="top: 78%; left: 14%; font-size: 4.2rem; color: #f59e0b;">5 10 15</span>
+  </div>
+
+  <!-- 1. GİRİŞ EKRANI -->
+  <div class="welcome-screen" id="welcomeScreen">
+    <div class="welcome-card">
+      <button class="btn-fs-corner" onclick="toggleFullScreen()"><span class="fs-icon">⛶</span> <span class="fs-text">Tam Ekran</span></button>
+      <div class="welcome-badge">⭐ Özel Eğitim Matematik Portalı</div>
+      <h1 class="app-main-title">RİTMİK SAYMA ATÖLYESİ</h1>
+      <div class="author-tag">👨‍🏫 Hazırlayan: Özel Eğitim Öğr. Cüneyd Kayalı</div>
+      <div class="start-student-box">
+        <div class="start-row">
+          <label>👤 Kayıtlı Öğrenci Seçin:</label>
+          <select class="styled-select" id="welcomeStudentSelect" style="width:100%;" onchange="syncStudentFromWelcome()"></select>
+        </div>
+        <div style="display: flex; align-items: center; gap: 8px;">
+          <div style="flex: 1; height: 1px; background: #cbd5e1;"></div><span style="font-weight: 800; color: #94a3b8; font-size: 0.95rem;">VEYA YENİ ÖĞRENCİ EKLE</span><div style="flex: 1; height: 1px; background: #cbd5e1;"></div>
+        </div>
+        <div class="start-row">
+          <div style="display: flex; gap: 8px;">
+            <input type="text" class="styled-input" id="welcomeNewStudentInput" placeholder="Ad Soyad yazın..." style="flex:1;">
+            <button class="btn-action-sm btn-add" onclick="addNewStudentFromWelcome()">+ Ekle</button>
+          </div>
+        </div>
+        <button class="btn-start-game" onclick="startAppSession()">Etkinliğe Başla 🚀</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 2. ANA OYUN ALANI -->
+  <div class="app-shell" id="mainAppShell">
+    
+    <div class="student-main-bar">
+      <div class="student-group">
+        <button class="btn-action-sm btn-home" onclick="goToWelcomeScreen()">🏠 Giriş</button>
+        <label>👤 Öğrenci:</label>
+        <select class="styled-select" id="mainStudentDropdown" onchange="onStudentSelectChange()"></select>
+        <button class="btn-action-sm btn-del" onclick="deleteCurrentStudent()">Sil</button>
+      </div>
+      <div class="student-group">
+        <input type="text" class="styled-input" id="newStudentInput" placeholder="Yeni Ad Soyad...">
+        <button class="btn-action-sm btn-add" onclick="addNewStudent()">+ Ekle</button>
+      </div>
+      <div class="accessibility-toggles">
+        <button class="btn-toggle-tool" id="btnAppFS" onclick="toggleFullScreen()">⛶ Tam Ekran</button>
+        <button class="btn-toggle-tool" id="btnCalm" onclick="toggleCalmMode()">🧘 Sakin Mod</button>
+        <button class="btn-toggle-tool" id="btnContrast" onclick="toggleContrastMode()">👁️ Kontrast</button>
+      </div>
+    </div>
+
+    <!-- ÖĞRENCİ ÖDEV WIDGET'I -->
+    <div class="hw-widget" id="studentHomeworkWidget">
+      <h3 class="hw-title">📝 Günlük Görevlerim (Ödev)</h3>
+      <div class="hw-task-list" id="studentTaskList"></div>
+      <div class="parent-note-box">
+        <label>👨‍👩‍👧 Veli Notu (Öğretmene İletmek İstedikleriniz):</label>
+        <div style="display: flex; gap: 8px;">
+          <input type="text" class="styled-input" id="parentNoteInput" placeholder="Buraya yazabilirsiniz..." style="flex:1; border-color: #fcd34d;">
+          <button class="btn-action-sm" style="background:#d97706; color:#fff;" onclick="saveParentNote()">Kaydet</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="top-control" id="controlPanel">
+      <div class="panel-title-text">Kaçar Saymak İstiyorsun?</div>
+      <div class="step-list" id="stepBar"></div>
+      <div class="sub-control-row">
+        <div class="dir-group">
+          <button class="dir-btn active" id="btnFwd" onclick="changeDirection('forward')">İleri ➡️</button>
+          <button class="dir-btn" id="btnBwd" onclick="changeDirection('backward')">Geri ⬅️</button>
+        </div>
+        <div class="dir-group">
+          <span style="font-weight: 800; font-size: 1rem;">Zorluk:</span>
+          <button class="opt-count-btn" id="btnOpt2" onclick="setChoiceCount(2)">2 Şık</button>
+          <button class="opt-count-btn active" id="btnOpt3" onclick="setChoiceCount(3)">3 Şık</button>
+          <button class="opt-count-btn" id="btnOpt4" onclick="setChoiceCount(4)">4 Şık</button>
+        </div>
+        <div class="timer-pill" id="timerLabel">⏱️ 0 sn</div>
+      </div>
+    </div>
+
+    <div class="nav-and-tools" id="navAndToolsRow">
+      <div class="mode-nav">
+        <button class="mode-pill active" onclick="switchView('hop')">🐸 Zıplama</button>
+        <button class="mode-pill" onclick="switchView('missing')">🎁 Eksik Sayı</button>
+        <button class="mode-pill" onclick="switchView('train')">🚂 Tren</button>
+        <button class="mode-pill" onclick="switchView('basket')">🧺 Sepetler</button>
+        <button class="mode-pill" onclick="switchView('balloon')">🎈 Balon</button>
+        <button class="mode-pill" onclick="switchView('spy')">🕵️ Casus Sayı</button>
+        <!-- YENİ: BASILI TUTULAN ÖĞRETMEN BUTONU -->
+        <button class="mode-pill teacher" id="btnTeacherPanel" title="Öğretmen paneline girmek için 3 saniye basılı tutun"
+                onmousedown="startTeacherHold(event)" onmouseup="endTeacherHold(event)" onmouseleave="endTeacherHold(event)" 
+                ontouchstart="startTeacherHold(event)" ontouchend="endTeacherHold(event)" ontouchcancel="endTeacherHold(event)">
+          <div class="fill-bg"></div>
+          <span>🔒 Öğretmen Paneli</span>
+        </button>
+      </div>
+      <div class="action-tools-group">
+        <button class="btn-recall-standalone" id="btnStandaloneRecall" onclick="playRecallSequence()">🎧 Hatırla</button>
+        <button class="btn-restart-standalone" id="btnStandaloneRestart" onclick="replayCurrentGame()">🔄 Yeniden Başlat</button>
+      </div>
+    </div>
+
+    <div class="stage">
+      <div class="hop-wrap" id="viewHop"><div class="lily-pond" id="pondContainer"></div></div>
+      <div class="missing-mode-wrap" id="viewMissing"><div style="font-size: 1.35rem; font-weight: 800; color: #b45309; margin-bottom: 12px;" id="missingHeader">🎁 Sihirli sandığın içindeki gizli sayıyı bul!</div><div class="missing-mode-track" id="missingTrack"></div></div>
+      <div class="train-wrap" id="viewTrain"><div class="train-track" id="trainTrack"></div></div>
+      <div class="basket-wrap" id="viewBasket"><div style="font-size: 1.35rem; font-weight: 800; color: #166534; margin-bottom: 10px;" id="basketHeader"></div><div class="orchard" id="orchardContainer"></div></div>
+      <div class="balloon-sky" id="viewBalloon"><div class="sky-header" id="balloonHeader">Bul: </div></div>
+      <div class="spy-wrap" id="viewSpy"><div style="font-size: 1.5rem; font-weight: 800; margin-bottom: 16px;" id="spyHeader">Casusu yakala!</div><div class="spy-grid" id="spyGrid"></div></div>
+      <div class="choices-container" id="choicesContainer"><div class="btn-grid-row three-opts" id="choicesButtons"></div></div>
+      <div class="feedback-toast" id="feedbackToast">Hayır, tekrar dene! 😊</div>
+      
+      <div class="win-modal" id="modalWin">
+        <div class="win-stars">⭐ 🏆 ⭐</div><h1 class="win-title">HARİKA!</h1><div class="win-sub">Tebrikler, Çok Başarılıydın! 🎉</div>
+        <button class="btn-choice" style="width: 100%; height: 75px; font-size: 1.6rem; background: #16a34a; box-shadow: 0 5px 0 #15803d;" onclick="replayCurrentGame()">Hemen Tekrar Oyna 🔁</button>
+      </div>
+
+      <div class="win-modal" id="modalHomeworkWin" style="border-color: #a21caf;">
+        <div class="win-stars">🌟 🏅 🌟</div><h1 class="win-title" style="color:#a21caf;">MUHTEŞEM!</h1><div class="win-sub" style="color:#86198f;">Bugünkü Tüm Ödevlerini Bitirdin! 🥳</div>
+        <button class="btn-choice" style="width: 100%; height: 75px; font-size: 1.6rem; background: #c026d3; box-shadow: 0 5px 0 #86198f;" onclick="closeHomeworkModal()">Kapat ❌</button>
+      </div>
+
+      <!-- ÖĞRETMEN PANELİ -->
+      <div class="teacher-panel" id="viewTeacher">
+        
+        <!-- YENİ: ÖĞRETMEN ÜST MENÜSÜ -->
+        <div style="display: flex; gap: 10px; margin-bottom: 24px; border-bottom: 2px solid #e2e8f0; padding-bottom: 16px; flex-wrap: wrap;">
+          <h2 style="margin: 0; font-size: 1.5rem; width:100%; color:#1e293b;" id="teacherPanelTitle">📊 Öğrenci Analizi</h2>
+          <button class="teacher-tab-btn active" id="tabBtnAnalytics" onclick="showTeacherTab('analytics')">📊 Analizler ve Ayarlar</button>
+          <button class="teacher-tab-btn" id="tabBtnHomework" onclick="showTeacherTab('homework')">📝 Ödev Yönetimi</button>
+          <button class="btn-print-report" style="margin-left: auto;" onclick="printActivityReport()">📄 PDF Rapor</button>
+        </div>
+
+        <!-- 1. BÖLÜM: ANALİZ VE AYARLAR SEKRESİ -->
+        <div id="teacherTabAnalytics">
+          <div class="backup-section" style="margin-top:0;">
+            <div><strong style="font-size: 1.15rem; color: #334155;">💾 Veri Güvenliği & Tablet Aktarımı</strong><div style="font-size: 0.95rem; color: #64748b; margin-top: 4px;">Ödevleri ve kayıtları dosyayla aktarın.</div></div>
+            <div class="backup-btn-group">
+              <button class="btn-backup btn-export" onclick="exportDataBackup()">📥 Yedeği İndir</button>
+              <label class="btn-backup btn-import" style="cursor: pointer;">📤 Yedekten Yükle <input type="file" id="backupFileInput" accept=".json" style="display: none;" onchange="importDataBackup(event)"></label>
+            </div>
+          </div>
+          
+          <div class="stat-card-row" style="margin-top: 18px;">
+            <div class="stat-card"><div class="val" id="statCompleted">0</div><div class="lbl">Tamamlanan Toplam Tur</div></div>
+            <div class="stat-card"><div class="val" id="statAvgTime">0 sn</div><div class="lbl">Ortalama Süre</div></div>
+            <div class="stat-card"><div class="val" id="statTotalErrors">0</div><div class="lbl">Genel Hata Sayısı</div></div>
+          </div>
+          <h3 style="font-size: 1.25rem; margin-bottom: 6px;">Genel Takıldığı Kritik Sayılar:</h3>
+          <table class="data-table">
+            <thead><tr><th>Ritmik Sayma</th><th>Hedef Sayı</th><th>Basılan Yanlış</th><th>Hata Tekrarı</th></tr></thead>
+            <tbody id="errorTableBody"><tr><td colspan="4" style="text-align:center; color:#94a3b8;">Henüz hata kaydı yok.</td></tr></tbody>
+          </table>
+          <div class="attempts-log-section">
+            <h3 style="margin: 0 0 10px 0; font-size: 1.3rem; color:#166534;">🤖 Deneme Bazlı Sistem Yorumları:</h3>
+            <div class="attempt-card-list" id="attemptCardsContainer"><div style="color:#64748b;">Henüz tamamlanmış bir deneme bulunmuyor.</div></div>
+          </div>
+          <div class="notes-section">
+            <h3 style="margin: 0 0 8px 0; font-size: 1.3rem; color:#92400e;">📝 Öğretmen Gözlem Notları:</h3>
+            <textarea class="note-input" id="teacherNoteInput" placeholder="Bu denemeyle ilgili bireysel gözleminizi yazın..."></textarea>
+            <button class="btn-action-sm btn-add" onclick="addTeacherNote()">Notu Kaydet</button>
+            <div id="notesListContainer"></div>
+          </div>
+        </div>
+
+        <!-- 2. BÖLÜM: ÖDEV SEKRESİ (Ayrı Sayfa) -->
+        <div id="teacherTabHomework" style="display: none;">
+          <div class="hw-create-section" style="margin-top:0;">
+            <h3 class="hw-create-title">📝 Öğrenciye Yeni Görev Ata</h3>
+            <p style="font-size:0.95rem; color:#701a75; margin:0 0 14px 0; font-weight:600;">Seçilen görevler öğrencinin giriş ekranında "Günlük Görevlerim" listesine eklenecektir.</p>
+            
+            <div class="hw-inputs">
+              <div class="hw-input-col">
+                <label>Ritmik Sayma:</label>
+                <select class="styled-select" id="hwStepSelect" style="border-color:#f0abfc;">
+                  <option value="2">2'şer Sayma</option> <option value="3">3'er Sayma</option> <option value="4">4'şer Sayma</option> <option value="5">5'er Sayma</option>
+                  <option value="6">6'şar Sayma</option> <option value="7">7'şer Sayma</option> <option value="8">8'er Sayma</option> <option value="9">9'ar Sayma</option> <option value="10">10'ar Sayma</option>
+                </select>
+              </div>
+              <div class="hw-input-col">
+                <label>Oyun Modu:</label>
+                <select class="styled-select" id="hwModeSelect" style="border-color:#f0abfc;">
+                  <option value="hop">🐸 Zıplama</option> <option value="missing">🎁 Eksik Sayı</option> <option value="train">🚂 Tren</option>
+                  <option value="basket">🧺 Sepetler</option> <option value="balloon">🎈 Balon</option> <option value="spy">🕵️ Casus Sayı</option>
+                </select>
+              </div>
+              <div class="hw-input-col">
+                <label>Kaç Defa Oynanacak:</label>
+                <select class="styled-select" id="hwCountSelect" style="border-color:#f0abfc;">
+                  <option value="1">1 Kez Tamamla</option> <option value="2">2 Kez Tamamla</option> <option value="3">3 Kez Tamamla</option> <option value="5">5 Kez Tamamla</option>
+                </select>
+              </div>
+              <button class="btn-action-sm" style="background:#a21caf; color:#fff; height: 42px;" onclick="addHomeworkToTempList()">+ Listeye Ekle</button>
+            </div>
+
+            <div class="hw-added-list" id="hwTempList"></div>
+            
+            <div style="display: flex; gap:10px; margin-top: 10px;">
+              <button class="btn-action-sm" style="background:#16a34a; color:#fff; flex:1; font-size:1.1rem; padding:12px;" onclick="saveHomeworkToStudent()">🚀 Ödevi Öğrenciye Ata</button>
+              <button class="btn-action-sm" style="background:#dc2626; color:#fff;" onclick="clearStudentHomework()">Ödevi İptal Et/Sil</button>
+            </div>
+          </div>
+
+          <div style="background:#fff; padding:16px; border-radius:16px; border:3px solid #fcd34d;">
+            <h3 style="color:#92400e; margin:0 0 10px 0;">👨‍👩‍👧 Veliden Gelen Not:</h3>
+            <div id="hwTeacherParentNoteView" style="color:#4a044e; font-size:1.1rem; font-weight:600; background:#fef3c7; padding:12px; border-radius:10px;">Henüz not girilmemiş.</div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+<script>
+  const fruitTypes = { 2: '🍒', 3: '🍎', 4: '🍋', 5: '🍓', 6: '🍇', 7: '🍉', 8: '🍊', 9: '🥝', 10: '⭐' };
+  const palette = ['#f43f5e', '#06b6d4', '#10b981', '#f59e0b', '#8b5cf6', '#ec4899'];
+  const modeNames = { 'hop': '🐸 Zıplama', 'missing': '🎁 Eksik Sayı', 'train': '🚂 Tren', 'basket': '🧺 Sepetler', 'balloon': '🎈 Balon', 'spy': '🕵️ Casus Sayı' };
+
+  let currentStep = 3, direction = 'forward', activeView = 'hop', choiceCount = 3;
+  let isCalmMode = false, isContrastMode = false;
+  let activeSequence = [], currentIndex = 0, consecutiveErrors = 0, roundErrors = []; 
+  let roundRecallCount = 0, roundHintCount = 0, isCurrentStepHinted = false;
+  let missingShuffledIndices = [], missingCurrentStep = 0, spyCount = 0;
+  let timerSec = 0, timerHandler = null, hintTimeoutHandler = null;
+
+  let tempHomeworkList = [];
+  let teacherHoldTimer = null; // 3sn basılı tutma için timer
+
+  /* --- 3 SANİYE ÖĞRETMEN KİLİDİ --- */
+  function startTeacherHold(e) {
+    if(e.type === 'touchstart') e.preventDefault(); // mobilde çift tetiklenmeyi önler
+    const btn = document.getElementById('btnTeacherPanel');
+    btn.classList.add('filling');
+    teacherHoldTimer = setTimeout(() => {
+      btn.classList.remove('filling');
+      switchView('teacher');
+    }, 3000); // 3000 ms = 3 saniye
+  }
+
+  function endTeacherHold(e) {
+    if(e.type === 'touchend' || e.type === 'touchcancel') e.preventDefault();
+    const btn = document.getElementById('btnTeacherPanel');
+    btn.classList.remove('filling');
+    clearTimeout(teacherHoldTimer);
+  }
+
+  function toggleFullScreen() {
+    const doc = window.document, docEl = doc.documentElement;
+    const requestFS = docEl.requestFullscreen || docEl.mozRequestFullScreen || docEl.webkitRequestFullScreen || docEl.msRequestFullscreen;
+    const cancelFS = doc.exitFullscreen || doc.mozCancelFullScreen || doc.webkitExitFullscreen || doc.msExitFullscreen;
+    const isFS = !!(doc.fullscreenElement || doc.mozFullScreenElement || doc.webkitFullscreenElement || doc.msFullscreenElement);
+    if (!isFS) { if (requestFS) requestFS.call(docEl).catch(err => console.log('Tam ekran engellendi:', err)); } 
+    else { if (cancelFS) cancelFS.call(doc); }
+  }
+
+  function updateFullscreenUI() {
+    const isFS = !!(document.fullscreenElement || document.webkitFullscreenElement || document.mozFullScreenElement || document.msFullscreenElement);
+    const cornerText = document.querySelector('.fs-text'), cornerIcon = document.querySelector('.fs-icon'), appBtn = document.getElementById('btnAppFS');
+    if (cornerText) cornerText.textContent = isFS ? 'Küçült' : 'Tam Ekran';
+    if (cornerIcon) cornerIcon.textContent = isFS ? '🗗' : '⛶';
+    if (appBtn) { appBtn.innerHTML = isFS ? '🗗 Küçült' : '⛶ Tam Ekran'; appBtn.classList.toggle('active', isFS); }
+  }
+
+  document.addEventListener('fullscreenchange', updateFullscreenUI); document.addEventListener('webkitfullscreenchange', updateFullscreenUI);
+
+  function speak(val) {
+    if ('speechSynthesis' in window) {
+      window.speechSynthesis.cancel();
+      const utter = new SpeechSynthesisUtterance(val.toString());
+      utter.lang = 'tr-TR'; utter.pitch = 1.1; utter.rate = 0.95; 
+      const voices = window.speechSynthesis.getVoices();
+      const naturalVoice = voices.find(v => v.lang.includes('tr') && (v.name.includes('Yelda') || v.name.includes('Google') || v.name.includes('Seda') || v.name.includes('Natural')));
+      if (naturalVoice) utter.voice = naturalVoice;
+      window.speechSynthesis.speak(utter);
+    }
+  }
+
+  function getStudentsDB() { 
+    let dbStr = localStorage.getItem('edu_students_db');
+    if (!dbStr) return { activeId: "default", list: { "default": createStudentObject("Örnek Öğrenci") } };
+    let db = JSON.parse(dbStr);
+    for (let key in db.list) { if (!db.list[key].homework) db.list[key].homework = { tasks: [], parentNote: '', isCompleted: false, assignedDate: '' }; }
+    return db;
+  }
+  function saveStudentsDB(db) { localStorage.setItem('edu_students_db', JSON.stringify(db)); populateStudentDropdowns(); }
+  function getCurrentStudent() { let db = getStudentsDB(); if (!db.list[db.activeId]) { db.activeId = Object.keys(db.list)[0]; saveStudentsDB(db); } return db.list[db.activeId]; }
+  function createStudentObject(name) { return { name: name, stats: { completed: 0, totalSeconds: 0 }, errors: [], attempts: [], notes: [], homework: { tasks: [], parentNote: '', isCompleted: false, assignedDate: '' } }; }
+
+  function populateStudentDropdowns() {
+    let db = getStudentsDB(); let mainSelect = document.getElementById('mainStudentDropdown'), welcomeSelect = document.getElementById('welcomeStudentSelect');
+    mainSelect.innerHTML = ''; welcomeSelect.innerHTML = '';
+    for (let id in db.list) {
+      let opt1 = document.createElement('option'); opt1.value = id; opt1.textContent = db.list[id].name; if (id === db.activeId) opt1.selected = true; mainSelect.appendChild(opt1);
+      let opt2 = document.createElement('option'); opt2.value = id; opt2.textContent = db.list[id].name; if (id === db.activeId) opt2.selected = true; welcomeSelect.appendChild(opt2);
+    }
+  }
+
+  function syncStudentFromWelcome() { let db = getStudentsDB(); db.activeId = document.getElementById('welcomeStudentSelect').value; saveStudentsDB(db); }
+  function onStudentSelectChange() { 
+    let db = getStudentsDB(); db.activeId = document.getElementById('mainStudentDropdown').value; saveStudentsDB(db); 
+    replayCurrentGame(); if (activeView === 'teacher') loadTeacherAnalytics(); 
+    checkAndRenderStudentHomework();
+  }
+
+  function addNewStudentFromWelcome() {
+    let input = document.getElementById('welcomeNewStudentInput'); let name = input.value.trim(); if (!name) return alert('Lütfen Ad Soyad yazın!');
+    let db = getStudentsDB(); let newId = 'std_' + Date.now(); db.list[newId] = createStudentObject(name); db.activeId = newId; saveStudentsDB(db); input.value = ''; alert(`${name} eklendi!`);
+  }
+  function addNewStudent() {
+    let input = document.getElementById('newStudentInput'); let name = input.value.trim(); if (!name) return alert('Lütfen Ad Soyad yazın!');
+    let db = getStudentsDB(); let newId = 'std_' + Date.now(); db.list[newId] = createStudentObject(name); db.activeId = newId; saveStudentsDB(db); input.value = ''; replayCurrentGame(); if (activeView === 'teacher') loadTeacherAnalytics(); checkAndRenderStudentHomework();
+  }
+  function deleteCurrentStudent() {
+    let db = getStudentsDB(); if (Object.keys(db.list).length <= 1) return alert('Sistemde en az 1 öğrenci bulunmalıdır.');
+    if (confirm(`${db.list[db.activeId].name} silinecek, emin misiniz?`)) { delete db.list[db.activeId]; db.activeId = Object.keys(db.list)[0]; saveStudentsDB(db); replayCurrentGame(); if (activeView === 'teacher') loadTeacherAnalytics(); checkAndRenderStudentHomework(); }
+  }
+
+  function startAppSession() { syncStudentFromWelcome(); document.getElementById('welcomeScreen').style.display = 'none'; document.getElementById('mainAppShell').style.display = 'flex'; replayCurrentGame(); checkAndRenderStudentHomework(); }
+  function goToWelcomeScreen() { stopTimer(); clearAutoHintTimeout(); document.getElementById('mainAppShell').style.display = 'none'; document.getElementById('welcomeScreen').style.display = 'flex'; populateStudentDropdowns(); }
+
+  function exportDataBackup() {
+    const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(getStudentsDB(), null, 2));
+    const a = document.createElement('a'); a.setAttribute("href", dataStr); a.setAttribute("download", `ritmik_sayma_yedek_${new Date().toISOString().slice(0, 10)}.json`); document.body.appendChild(a); a.click(); a.remove();
+  }
+  function importDataBackup(event) {
+    const file = event.target.files[0]; if (!file) return; const reader = new FileReader();
+    reader.onload = function(e) { try { const importedDB = JSON.parse(e.target.result); if (importedDB && importedDB.list) { saveStudentsDB(importedDB); alert('Veriler geri yüklendi!'); location.reload(); } } catch (err) { alert('Hata: ' + err.message); } }; reader.readAsText(file);
+  }
+
+  function toggleCalmMode() { isCalmMode = !isCalmMode; document.getElementById('btnCalm').classList.toggle('active', isCalmMode); }
+  function toggleContrastMode() { isContrastMode = !isContrastMode; document.body.classList.toggle('contrast-mode', isContrastMode); document.getElementById('btnContrast').classList.toggle('active', isContrastMode); }
+
+  function setChoiceCount(cnt) {
+    choiceCount = cnt; document.getElementById('btnOpt2').classList.toggle('active', cnt === 2); document.getElementById('btnOpt3').classList.toggle('active', cnt === 3); document.getElementById('btnOpt4').classList.toggle('active', cnt === 4);
+    if (activeView !== 'spy' && activeView !== 'balloon' && activeView !== 'teacher') renderChoicesArea();
+  }
+  function renderStepButtons() {
+    const bar = document.getElementById('stepBar'); bar.innerHTML = '';
+    for (let s = 2; s <= 10; s++) { const btn = document.createElement('button'); btn.className = `step-pill ${s === currentStep ? 'active' : ''}`; btn.textContent = s; btn.onclick = () => selectStep(s); bar.appendChild(btn); }
+  }
+  function selectStep(step) { currentStep = step; document.querySelectorAll('.step-pill').forEach(b => b.classList.toggle('active', parseInt(b.textContent) === step)); replayCurrentGame(); }
+  function changeDirection(dir) { direction = dir; document.getElementById('btnFwd').classList.toggle('active', dir === 'forward'); document.getElementById('btnBwd').classList.toggle('active', dir === 'backward'); replayCurrentGame(); }
+
+  /* --- ÖĞRETMEN ALT SEKMELERİ --- */
+  function showTeacherTab(tabName) {
+    document.getElementById('tabBtnAnalytics').classList.toggle('active', tabName === 'analytics');
+    document.getElementById('tabBtnHomework').classList.toggle('active', tabName === 'homework');
+    
+    document.getElementById('teacherTabAnalytics').style.display = (tabName === 'analytics') ? 'block' : 'none';
+    document.getElementById('teacherTabHomework').style.display = (tabName === 'homework') ? 'block' : 'none';
+  }
+
+  function switchView(view) {
+    activeView = view; document.querySelectorAll('.mode-pill').forEach(b => b.classList.remove('active'));
+    document.querySelectorAll('.mode-pill').forEach(b => { if ((view === 'hop' && b.textContent.includes('Zıplama')) || (view === 'missing' && b.textContent.includes('Eksik')) || (view === 'train' && b.textContent.includes('Tren')) || (view === 'basket' && b.textContent.includes('Sepetler')) || (view === 'balloon' && b.textContent.includes('Balon')) || (view === 'spy' && b.textContent.includes('Casus')) || (view === 'teacher' && b.textContent.includes('Öğretmen'))) b.classList.add('active'); });
+    
+    if (view === 'teacher') {
+      document.getElementById('controlPanel').style.display = 'none'; document.getElementById('choicesContainer').style.display = 'none'; document.getElementById('btnStandaloneRecall').style.display = 'none'; document.getElementById('btnStandaloneRestart').style.display = 'none'; document.getElementById('studentHomeworkWidget').style.display = 'none';
+      document.getElementById('viewHop').style.display = 'none'; document.getElementById('viewMissing').style.display = 'none'; document.getElementById('viewTrain').style.display = 'none'; document.getElementById('viewBasket').style.display = 'none'; document.getElementById('viewBalloon').style.display = 'none'; document.getElementById('viewSpy').style.display = 'none'; document.getElementById('modalWin').style.display = 'none'; document.getElementById('modalHomeworkWin').style.display = 'none';
+      
+      document.getElementById('viewTeacher').style.display = 'block'; 
+      showTeacherTab('analytics'); // Panel ilk açıldığında hep analiz açılsın
+      loadTeacherAnalytics(); stopTimer(); clearAutoHintTimeout(); return;
+    }
+    
+    document.getElementById('controlPanel').style.display = 'block'; document.getElementById('viewTeacher').style.display = 'none'; replayCurrentGame(); checkAndRenderStudentHomework();
+  }
+
+  function addHomeworkToTempList() {
+    let step = parseInt(document.getElementById('hwStepSelect').value); let mode = document.getElementById('hwModeSelect').value; let count = parseInt(document.getElementById('hwCountSelect').value);
+    tempHomeworkList.push({ step: step, mode: mode, requiredCount: count, completedCount: 0, isDone: false }); renderTempHomeworkList();
+  }
+  function renderTempHomeworkList() {
+    let listEl = document.getElementById('hwTempList'); listEl.innerHTML = '';
+    tempHomeworkList.forEach((t, index) => { let div = document.createElement('div'); div.className = 'hw-added-item'; div.innerHTML = `<span>${t.step}'şer Sayma - ${modeNames[t.mode]} (${t.requiredCount} kez)</span> <button style="background:none; border:none; color:red; font-weight:bold; cursor:pointer;" onclick="removeTempHomework(${index})">X</button>`; listEl.appendChild(div); });
+  }
+  function removeTempHomework(index) { tempHomeworkList.splice(index, 1); renderTempHomeworkList(); }
+
+  function saveHomeworkToStudent() {
+    if (tempHomeworkList.length === 0) return alert("Listeye hiç görev eklemediniz!");
+    let db = getStudentsDB(); let student = db.list[db.activeId];
+    student.homework = { tasks: [...tempHomeworkList], parentNote: '', isCompleted: false, assignedDate: new Date().toLocaleDateString('tr-TR') };
+    saveStudentsDB(db); tempHomeworkList = []; renderTempHomeworkList();
+    alert(`${student.name} için ödev başarıyla atandı! Öğrenci sisteme girdiğinde bu görevleri görecektir.`); loadTeacherAnalytics();
+  }
+  function clearStudentHomework() {
+    let db = getStudentsDB(); let student = db.list[db.activeId];
+    if (confirm("Öğrencinin mevcut ödevini silmek istediğinize emin misiniz?")) { student.homework = { tasks: [], parentNote: '', isCompleted: false, assignedDate: '' }; saveStudentsDB(db); alert("Ödev temizlendi."); loadTeacherAnalytics(); }
+  }
+
+  function checkAndRenderStudentHomework() {
+    if (activeView === 'teacher') return;
+    let student = getCurrentStudent(); let widget = document.getElementById('studentHomeworkWidget'); let taskList = document.getElementById('studentTaskList'); let noteInput = document.getElementById('parentNoteInput');
+    if (student.homework && student.homework.tasks && student.homework.tasks.length > 0) {
+      widget.style.display = 'block'; taskList.innerHTML = '';
+      student.homework.tasks.forEach(t => {
+        let div = document.createElement('div'); div.className = `hw-task-item ${t.isDone ? 'done' : ''}`;
+        let statusText = t.isDone ? '✅ Bitti' : `⏳ ${t.completedCount} / ${t.requiredCount} Yapıldı`;
+        div.innerHTML = `<span>🎯 ${t.step}'şer Sayma - ${modeNames[t.mode]}</span> <span class="hw-task-status">${statusText}</span>`; taskList.appendChild(div);
+      }); noteInput.value = student.homework.parentNote || '';
+    } else { widget.style.display = 'none'; }
+  }
+
+  function saveParentNote() {
+    let val = document.getElementById('parentNoteInput').value.trim(); let db = getStudentsDB(); let student = db.list[db.activeId];
+    student.homework.parentNote = val; saveStudentsDB(db); alert("Notunuz öğretmene başarıyla iletilmek üzere kaydedildi.");
+  }
+  function closeHomeworkModal() { document.getElementById('modalHomeworkWin').style.display = 'none'; }
+
+  function getActiveNumbers() { let list = []; for (let i = 1; i <= 10; i++) list.push(i * currentStep); return direction === 'backward' ? list.reverse() : list; }
+  function startTimer() { clearInterval(timerHandler); timerSec = 0; document.getElementById('timerLabel').textContent = `⏱️ 0 sn`; timerHandler = setInterval(() => { timerSec++; document.getElementById('timerLabel').textContent = `⏱️ ${timerSec} sn`; }, 1000); }
+  function stopTimer() { clearInterval(timerHandler); }
+  function clearAutoHintTimeout() { if (hintTimeoutHandler) clearTimeout(hintTimeoutHandler); }
+  function resetAutoHintTimer() { clearAutoHintTimeout(); isCurrentStepHinted = false; hintTimeoutHandler = setTimeout(() => { triggerAutomaticHint(); }, 7000); }
+  function triggerAutomaticHint() { const target = getActiveTargetNumber(); document.querySelectorAll('.btn-choice').forEach(b => { if (parseInt(b.textContent) === target) { b.classList.add('glow-hint'); speak(`İpucu: Sayımız ${target}`); isCurrentStepHinted = true; roundHintCount++; setTimeout(() => b.classList.remove('glow-hint'), 2500); } }); }
+
+  function playRecallSequence() {
+    clearAutoHintTimeout();
+    if (activeView !== 'missing' && currentIndex === 0) { speak("Henüz başındasın, ilk sayıyı sen bulabilirsin!"); showFeedbackToast("İlk sayıyı kendin dene! 🌟"); setTimeout(() => hideFeedbackToast(), 1400); resetAutoHintTimer(); return; }
+    roundRecallCount++; let text = "";
+    if (activeView === 'missing') { const targetIdx = missingShuffledIndices[missingCurrentStep]; if (targetIdx === 0) text = `Sandıktan sonraki sayı ${activeSequence[1]}... Sandığın yerine hangisi gelmeli?`; else text = `Sandıktan önceki sayımız ${activeSequence[targetIdx - 1]}... Sıradaki sayıyı bulabilir misin?`; } 
+    else { text = `Şimdiye kadar saydıklarımız: ${activeSequence.slice(0, currentIndex).join(', ')}... Şimdi sıra sende!`; }
+    speak(text); resetAutoHintTimer();
+  }
+
+  function getActiveTargetNumber() { return activeView === 'missing' ? activeSequence[missingShuffledIndices[missingCurrentStep]] : activeSequence[currentIndex]; }
+
+  function replayCurrentGame() {
+    document.getElementById('modalWin').style.display = 'none'; document.getElementById('modalHomeworkWin').style.display = 'none'; hideFeedbackToast(); clearAutoHintTimeout(); stopTimer();
+    document.getElementById('viewHop').style.display = (activeView === 'hop') ? 'flex' : 'none'; document.getElementById('viewMissing').style.display = (activeView === 'missing') ? 'flex' : 'none'; document.getElementById('viewTrain').style.display = (activeView === 'train') ? 'flex' : 'none'; document.getElementById('viewBasket').style.display = (activeView === 'basket') ? 'flex' : 'none'; document.getElementById('viewBalloon').style.display = (activeView === 'balloon') ? 'block' : 'none'; document.getElementById('viewSpy').style.display = (activeView === 'spy') ? 'flex' : 'none'; document.getElementById('choicesContainer').style.display = (activeView === 'spy') ? 'none' : 'flex'; document.getElementById('btnStandaloneRecall').style.display = (activeView === 'spy') ? 'none' : 'flex'; document.getElementById('btnStandaloneRestart').style.display = 'flex';
+    activeSequence = getActiveNumbers(); currentIndex = 0; consecutiveErrors = 0; roundErrors = []; roundRecallCount = 0; roundHintCount = 0; isCurrentStepHinted = false; spyCount = 0; missingCurrentStep = 0; missingShuffledIndices = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9].sort(() => Math.random() - 0.5);
+    startTimer(); if (activeView === 'hop') renderPond(); if (activeView === 'missing') renderMissingMode(); if (activeView === 'train') renderTrain(); if (activeView === 'basket') renderOrchard(); if (activeView === 'balloon') spawnBalloons(); if (activeView === 'spy') renderSpyRound(); if (activeView !== 'spy' && activeView !== 'balloon') renderChoicesArea();
+  }
+
+  function showFeedbackToast(msg) { const el = document.getElementById('feedbackToast'); el.textContent = msg; el.style.display = 'block'; }
+  function hideFeedbackToast() { document.getElementById('feedbackToast').style.display = 'none'; }
+
+  function recordError(targetNum, chosenNum) {
+    roundErrors.push({ target: targetNum, wrong: chosenNum }); let db = getStudentsDB(); let student = db.list[db.activeId]; if (!student) return;
+    let existing = student.errors.find(item => item.step === currentStep && item.target === targetNum && item.wrong === chosenNum);
+    if (existing) existing.count += 1; else student.errors.push({ step: currentStep, target: targetNum, wrong: chosenNum, count: 1 }); saveStudentsDB(db);
+  }
+
+  function handleMistake(btnEl, targetNum, chosenNum, refreshCallback) {
+    clearAutoHintTimeout(); consecutiveErrors++; recordError(targetNum, chosenNum); btnEl.classList.add('shake'); setTimeout(() => btnEl.classList.remove('shake'), 300); speak("Hayır, tekrar dene!"); showFeedbackToast("Hayır, tekrar dene! 😊");
+    if (consecutiveErrors >= 2) { setTimeout(() => { showFeedbackToast("Seçenekler yenilendi, tekrar dene! 🔄"); consecutiveErrors = 0; setTimeout(() => { hideFeedbackToast(); refreshCallback(); }, 600); }, 700); } 
+    else { setTimeout(() => hideFeedbackToast(), 1400); resetAutoHintTimer(); }
+  }
+
+  function renderPond() { const pond = document.getElementById('pondContainer'); pond.innerHTML = ''; activeSequence.forEach((val, idx) => { const pad = document.createElement('div'); pad.className = 'pad'; if (idx < currentIndex) pad.textContent = val; else if (idx === currentIndex) { pad.classList.add('missing'); pad.textContent = '?'; const f = document.createElement('div'); f.className = 'frog-char'; f.textContent = '🐸'; pad.appendChild(f); } else { pad.classList.add('empty'); pad.textContent = '•'; } pond.appendChild(pad); }); }
+  function renderMissingMode() { const track = document.getElementById('missingTrack'); track.innerHTML = ''; const currentTargetIdx = missingShuffledIndices[missingCurrentStep]; document.getElementById('missingHeader').textContent = `🎁 Sihirli sandıktaki sayıyı bul! (${missingCurrentStep + 1} / 10)`; activeSequence.forEach((val, idx) => { const block = document.createElement('div'); block.className = 'toy-block'; if (idx === currentTargetIdx) { block.classList.add('mystery-chest'); block.innerHTML = `<span class="chest-icon">📦</span><span>?</span>`; } else { block.textContent = val; } track.appendChild(block); }); }
+  function renderTrain() { const track = document.getElementById('trainTrack'); track.innerHTML = '<div class="train-loco">🚂</div>'; activeSequence.forEach((val, idx) => { const wagon = document.createElement('div'); wagon.className = 'wagon'; if (idx < currentIndex) wagon.textContent = val; else if (idx === currentIndex) { wagon.classList.add('missing'); wagon.textContent = '?'; } else { wagon.classList.add('empty'); wagon.textContent = '•'; } track.appendChild(wagon); }); }
+  function renderOrchard() { const orch = document.getElementById('orchardContainer'); orch.innerHTML = ''; const icon = fruitTypes[currentStep] || '🍎'; for (let i = 0; i <= currentIndex && i < activeSequence.length; i++) { const b = document.createElement('div'); b.className = 'basket'; const grid = document.createElement('div'); grid.className = 'interactive-fruit-grid'; const startNum = (i * currentStep) + 1; for (let k = 0; k < currentStep; k++) { const itemNumber = startNum + k; const item = document.createElement('span'); item.className = 'touch-fruit'; item.textContent = icon; item.onclick = (e) => { e.stopPropagation(); item.classList.toggle('counted'); speak(itemNumber); }; grid.appendChild(item); } b.appendChild(grid); const total = document.createElement('div'); total.className = 'basket-total'; total.textContent = (i === currentIndex ? '?' : activeSequence[i]); b.appendChild(total); orch.appendChild(b); } document.getElementById('basketHeader').textContent = `Her sepette ${currentStep} nesne var. Dokundukça sayarak devam edebilirsin!`; }
+
+  function renderChoicesArea() {
+    resetAutoHintTimer(); const box = document.getElementById('choicesButtons'); box.innerHTML = '';
+    let gridClass = 'three-opts'; if (choiceCount === 2) gridClass = 'two-opts'; if (choiceCount === 4) gridClass = 'four-opts'; box.className = `btn-grid-row ${gridClass}`; const target = getActiveTargetNumber();
+    generateOptions(target, choiceCount).forEach(num => { const b = document.createElement('button'); b.className = 'btn-choice'; b.textContent = num; b.onclick = () => { clearAutoHintTimeout(); if (num === target) { hideFeedbackToast(); speak(num); consecutiveErrors = 0; if (activeView === 'missing') { missingCurrentStep++; if (missingCurrentStep >= activeSequence.length) finishGame(); else { renderMissingMode(); renderChoicesArea(); } } else { currentIndex++; if (currentIndex >= activeSequence.length) finishGame(); else { if (activeView === 'hop') renderPond(); if (activeView === 'train') renderTrain(); if (activeView === 'basket') renderOrchard(); renderChoicesArea(); } } } else handleMistake(b, target, num, renderChoicesArea); }; box.appendChild(b); });
+  }
+
+  function spawnBalloons() { clearAutoHintTimeout(); resetAutoHintTimer(); if (currentIndex >= activeSequence.length) { finishGame(); return; } const sky = document.getElementById('viewBalloon'); sky.querySelectorAll('.balloon').forEach(b => b.remove()); const target = activeSequence[currentIndex]; document.getElementById('balloonHeader').textContent = `Bul: ${target}`; generateOptions(target, choiceCount).forEach((num, i) => { const b = document.createElement('div'); b.className = 'balloon'; b.style.backgroundColor = palette[i % palette.length]; b.textContent = num; b.style.left = `${12 + i * 24}%`; b.style.top = `${75 + Math.random() * 130}px`; b.onclick = () => { clearAutoHintTimeout(); if (num === target) { hideFeedbackToast(); speak(num); consecutiveErrors = 0; b.style.transform = 'scale(1.35)'; b.style.opacity = '0'; setTimeout(() => { currentIndex++; spawnBalloons(); }, 200); } else handleMistake(b, target, num, spawnBalloons); }; sky.appendChild(b); }); }
+  function renderSpyRound() { clearAutoHintTimeout(); if (spyCount >= 5) { finishGame(); return; } const box = document.getElementById('spyGrid'); box.innerHTML = ''; let valids = []; while (valids.length < 3) { let m = (Math.floor(Math.random() * 10) + 1) * currentStep; if (!valids.includes(m)) valids.push(m); } let spyVal = valids[0] + 1; if (spyVal % currentStep === 0) spyVal += 1; let items = [...valids, spyVal].sort(() => Math.random() - 0.5); document.getElementById('spyHeader').textContent = `${currentStep}'in kuralını bozan casus hangisi? (${spyCount + 1}/5)`; items.forEach(num => { const b = document.createElement('button'); b.className = 'btn-spy'; b.textContent = num; b.onclick = () => { if (num === spyVal) { hideFeedbackToast(); speak("Harika"); consecutiveErrors = 0; spyCount++; renderSpyRound(); } else handleMistake(b, spyVal, num, renderSpyRound); }; box.appendChild(b); }); }
+  function generateOptions(target, count = 3) { let opts = [target]; while (opts.length < count) { let diff = (Math.floor(Math.random() * 7) - 3) * currentStep; if (diff === 0) diff = currentStep; let candidate = target + diff; if (candidate > 0 && candidate <= (currentStep * 12) && !opts.includes(candidate)) opts.push(candidate); } return opts.sort(() => Math.random() - 0.5); }
+
+  function finishGame() {
+    stopTimer(); clearAutoHintTimeout(); hideFeedbackToast();
+    let db = getStudentsDB(); let student = db.list[db.activeId]; if (!student) return;
+    if (!student.attempts) student.attempts = [];
+    let attemptNumber = student.stats.completed + 1, now = new Date(), timeStr = now.toLocaleDateString('tr-TR') + ' ' + now.toLocaleTimeString('tr-TR', { hour: '2-digit', minute: '2-digit' });
+    let dirName = direction === 'forward' ? 'İleri' : 'Geri', currentModeTitle = modeNames[activeView] || 'Ritmik Sayma';
+    
+    let triggerHomeworkWin = false;
+    if (student.homework && student.homework.tasks.length > 0 && !student.homework.isCompleted) {
+      let matchedTask = student.homework.tasks.find(t => t.step === currentStep && t.mode === activeView && !t.isDone);
+      if (matchedTask) { matchedTask.completedCount++; if (matchedTask.completedCount >= matchedTask.requiredCount) { matchedTask.isDone = true; } let allDone = student.homework.tasks.every(t => t.isDone); if (allDone) { student.homework.isCompleted = true; triggerHomeworkWin = true; } }
+    }
+
+    let prevSameAttempt = student.attempts.find(a => a.step === currentStep && a.direction === dirName && a.modeTitle === currentModeTitle);
+    let commentParts = [`📌 [${currentModeTitle}] etkinliğinde çalışıldı.`];
+    if (roundErrors.length === 0) commentParts.push(`🎯 Mükemmel bir tur! ${currentStep}'er ${dirName.toLowerCase()} saymayı hiç hata yapmadan tamamladı.`); else if (roundErrors.length === 1) commentParts.push(`Öğrenci bu turda 1 hata yaptı. 1 hata tespit edildi. Özellikle **${roundErrors[0].target}** sayısına geçerken hata yaptı.`); else { let uniqueTargets = [...new Set(roundErrors.map(e => e.target))]; commentParts.push(`Öğrenci bu turda ${roundErrors.length} kez hata yaptı. Özellikle **[${uniqueTargets.join(', ')}]** sayılarına geçerken hata yaptı.`); }
+    if (roundRecallCount > 0) commentParts.push(`🎧 Öğrenci bu turda ${roundRecallCount} kez sesli hatırlatıcı kullandı.`);
+    if (roundHintCount > 0) commentParts.push(`💡 Öğrenci ${roundHintCount} soruyu 7 saniye bekleme sonrası verilen otomatik görsel ipucu desteğiyle doğru tamamlamıştır.`); else commentParts.push(`💡 İpucuna hiç gerek duymadan tüm sorulara zamanında ve bağımsız tepki verdi.`);
+    commentParts.push(`⏱️ Tur süresi: ${timerSec} saniye.`);
+    if (prevSameAttempt) { let diff = prevSameAttempt.duration - timerSec; if (diff > 2) commentParts.push(`🚀 Gelişim: Önceki **${currentStep}'er ${dirName} (${currentModeTitle})** çalışmasına göre ${diff} saniye daha hızlıydı.`); else if (diff < -5) commentParts.push(`⏳ Önceki aynı çalışmasına göre biraz daha düşünerek ilerledi.`); if (roundErrors.length < prevSameAttempt.errorCount) commentParts.push(`📉 Başarı: Bir önceki aynı çalışmaya göre hata sayısını azalttı.`); } else commentParts.push(`(Bu öğrencinin ${currentStep}'er ${dirName} [${currentModeTitle}] türündeki ilk denemesi olarak kaydedildi.)`);
+
+    student.attempts.unshift({ attemptNum: attemptNumber, step: currentStep, direction: dirName, modeTitle: currentModeTitle, duration: timerSec, errorCount: roundErrors.length, recallCount: roundRecallCount, hintCount: roundHintCount, errors: [...roundErrors], date: timeStr, systemComment: commentParts.join(' ') }); student.stats.completed += 1; student.stats.totalSeconds += timerSec; saveStudentsDB(db);
+    document.getElementById('viewHop').style.display = 'none'; document.getElementById('viewMissing').style.display = 'none'; document.getElementById('viewTrain').style.display = 'none'; document.getElementById('viewBasket').style.display = 'none'; document.getElementById('viewBalloon').style.display = 'none'; document.getElementById('viewSpy').style.display = 'none'; document.getElementById('choicesContainer').style.display = 'none'; document.getElementById('btnStandaloneRecall').style.display = 'none';
+    
+    checkAndRenderStudentHomework(); speak("Harika! Tebrikler!"); 
+    if (triggerHomeworkWin) { document.getElementById('modalHomeworkWin').style.display = 'block'; speak("Harika! Bugünkü Tüm Ödevlerini Bitirdin!"); } else { document.getElementById('modalWin').style.display = 'block'; }
+    if (!isCalmMode && typeof confetti === 'function') confetti({ particleCount: 100, spread: 80, origin: { y: 0.6 } });
+  }
+
+  function loadTeacherAnalytics() {
+    let student = getCurrentStudent(); if (!student) return;
+    document.getElementById('teacherPanelTitle').textContent = `📊 ${student.name} Analizleri`;
+    tempHomeworkList = []; renderTempHomeworkList();
+    document.getElementById('hwTeacherParentNoteView').textContent = (student.homework && student.homework.parentNote) ? student.homework.parentNote : 'Henüz not girilmemiş.';
+    document.getElementById('statCompleted').textContent = student.stats.completed; document.getElementById('statAvgTime').textContent = `${student.stats.completed > 0 ? Math.round(student.stats.totalSeconds / student.stats.completed) : 0} sn`; document.getElementById('statTotalErrors').textContent = student.errors ? student.errors.reduce((sum, item) => sum + item.count, 0) : 0;
+    const tbody = document.getElementById('errorTableBody'); tbody.innerHTML = ''; if (!student.errors || student.errors.length === 0) tbody.innerHTML = '<tr><td colspan="4" style="text-align:center; color:#94a3b8;">Henüz kayıtlı bir hata yok.</td></tr>'; else [...student.errors].sort((a, b) => b.count - a.count).forEach(row => { tbody.innerHTML += `<tr><td><strong>${row.step}'şer</strong></td><td style="color:#16a34a; font-weight:bold;">${row.target}</td><td style="color:#dc2626; font-weight:bold;">${row.wrong}</td><td><strong>${row.count} kez</strong></td></tr>`; });
+    renderAttemptsLog(student); renderTeacherNotes();
+  }
+
+  function renderAttemptsLog(student) { const box = document.getElementById('attemptCardsContainer'); box.innerHTML = ''; if (!student.attempts || student.attempts.length === 0) { box.innerHTML = '<div style="color:#64748b;">Henüz tamamlanmış bir deneme bulunmuyor.</div>'; return; } student.attempts.forEach(att => { box.innerHTML += `<div class="attempt-card"><div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; margin-bottom:6px;"><div><span class="attempt-tag">🎯 Deneme ${att.attemptNum}</span><strong style="margin-left: 8px; font-size:1.05rem;">${att.step}'şer (${att.direction}) - ${att.modeTitle || 'Genel'}</strong></div><div style="font-size:0.9rem; font-weight:bold; color:#64748b;">⏱️ ${att.duration} sn | ❌ ${att.errorCount} Hata | 🎧 ${att.recallCount || 0} Hatırlatma | 💡 ${att.hintCount || 0} İpucu | 📅 ${att.date}</div></div><div class="system-comment-text">💡 <strong>Sistem Analizi:</strong> ${att.systemComment}</div></div>`; }); }
+  function addTeacherNote() { let input = document.getElementById('teacherNoteInput'), text = input.value.trim(); if (!text) return alert('Lütfen not yazın!'); let db = getStudentsDB(), student = db.list[db.activeId]; if (!student) return; if (!student.notes) student.notes = []; student.notes.unshift({ attempt: student.stats.completed > 0 ? student.stats.completed : 1, date: new Date().toLocaleDateString('tr-TR') + ' ' + new Date().toLocaleTimeString('tr-TR', { hour: '2-digit', minute: '2-digit' }), text: text }); saveStudentsDB(db); input.value = ''; renderTeacherNotes(); }
+  function renderTeacherNotes() { let student = getCurrentStudent(), container = document.getElementById('notesListContainer'); container.innerHTML = ''; if (!student.notes || student.notes.length === 0) { container.innerHTML = '<div style="color:#94a3b8; font-size:0.95rem; margin-top:6px;">Henüz bir öğretmen notu eklenmemiş.</div>'; return; } student.notes.forEach(n => { container.innerHTML += `<div class="note-item"><div style="display:flex; justify-content:space-between; font-size:0.85rem; font-weight:bold; color:#b45309; margin-bottom:4px;"><span>📝 Deneme ${n.attempt} Notu</span><span>📅 ${n.date}</span></div><div>${n.text}</div></div>`; }); }
+  function printActivityReport() { let student = getCurrentStudent(); if (!student) return; let printWindow = window.open('', '', 'width=850,height=900'); let attemptsHtml = ''; (student.attempts || []).forEach(a => { attemptsHtml += `<tr><td>Deneme ${a.attemptNum}</td><td>${a.modeTitle || 'Ritmik Sayma'}</td><td>${a.step}'şer (${a.direction})</td><td>${a.duration} sn</td><td>${a.errorCount}</td><td>${a.recallCount || 0}</td><td>${a.hintCount || 0}</td><td>${a.systemComment}</td><td>${a.date}</td></tr>`; }); let notesHtml = ''; (student.notes || []).forEach(n => { notesHtml += `<li><strong>[Deneme ${n.attempt} - ${n.date}]:</strong> ${n.text}</li>`; }); printWindow.document.write(`<html><head><title>Etkinlik Gelişim Raporu - ${student.name}</title><style>body { font-family: sans-serif; padding: 24px; color: #111; line-height: 1.5; } h1 { border-bottom: 2px solid #333; padding-bottom: 8px; font-size: 20px; } table { width: 100%; border-collapse: collapse; margin: 16px 0; } th, td { border: 1px solid #999; padding: 8px; text-align: left; font-size: 12px; } th { background: #eee; }</style></head><body><h1>Matematik Ritmik Sayma Etkinlik Gelişim Raporu</h1><p><strong>Öğrenci Adı Soyadı:</strong> ${student.name}</p><p><strong>Rapor Tarihi:</strong> ${new Date().toLocaleDateString('tr-TR')}</p><p><strong>Tamamlanan Toplam Tur:</strong> ${student.stats.completed}</p><h3>Etkinlik Deneme Kayıtları:</h3><table><thead><tr><th>Deneme</th><th>Etkinlik Türü</th><th>Sayma</th><th>Süre</th><th>Hata</th><th>Hatırlatma</th><th>İpucu</th><th>Sistem Değerlendirmesi</th><th>Tarih</th></tr></thead><tbody>${attemptsHtml || '<tr><td colspan="9">Kayıt bulunamadı.</td></tr>'}</tbody></table><h3>Öğretmen Gözlem Notları:</h3><ul>${notesHtml || '<li>Kayıtlı not bulunmuyor.</li>'}</ul></body></html>`); printWindow.document.close(); printWindow.focus(); setTimeout(() => { printWindow.print(); }, 500); }
+
+  populateStudentDropdowns(); renderStepButtons();
+</script>
+
+<script>
+  if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => { navigator.serviceWorker.register('sw.js').catch(err => console.log('PWA hatası: ', err)); });
+  }
+</script>
+</body>
+</html>
